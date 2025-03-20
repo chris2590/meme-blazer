@@ -6,41 +6,33 @@
   "dependencies": {
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
-    "@solana/wallet-adapter-react-ui": "^0.9.34",
-    "@solana/wallet-adapter-wallets": "^0.19.25",
-    "@solana/web3.js": "^1.87.6",
-    "@solana/spl-token": "^0.3.8",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",  // Latest, supports WalletConnect v2
+    "@solana/web3.js": "^1.95.1",                  // Latest
+    "@solana/spl-token": "^0.4.8",                 // Latest
     "canvas-confetti": "^1.9.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^4.12.0",
-    "sharp": "^0.33.2"
+    "react": "^18.3.1",                           // Latest
+    "react-dom": "^18.3.1",                       // Latest
+    "react-icons": "^5.2.1",                      // Latest
+    "sharp": "^0.33.4"                            // Latest
   },
   "devDependencies": {
-    "react-scripts": "5.0.1",
-    "ajv": "^8.12.0",
-    "typescript": "^4.9.5",
-    "webpack": "^5.89.0",
-    "eslint": "^8.56.0"
+    "react-scripts": "5.0.1",                     // Stick with this for now—5.1.x is out but riskier
+    "ajv": "^8.17.1",                            // Latest
+    "typescript": "^5.4.5",                      // Latest
+    "webpack": "^5.92.1",                        // Latest
+    "eslint": "^8.57.0"                          // Latest
   },
   "scripts": {
-    "preinstall": "npm install ajv@^8.12.0 --save-dev",
+    "preinstall": "npm install ajv@^8.17.1 --save-dev",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
   },
   "engines": {
     "node": "18.x"
