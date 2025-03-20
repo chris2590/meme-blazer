@@ -1,0 +1,548 @@
+/* App.css */
+:root {
+  --primary-color: #ff5722;
+  --secondary-color: #4a148c;
+  --background-color: #121212;
+  --card-background: #1e1e2f;
+  --text-color: #ffffff;
+  --border-color: #2c2c3a;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --error-color: #f44336;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-right: 0.5rem;
+}
+
+.logo-text h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.logo-text p {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.wallet-connect {
+  display: flex;
+}
+
+.menu-button {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  display: none;
+  background-color: var(--card-background);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.menu-items button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  padding: 0.5rem;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.menu-items button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Social Sharing */
+.social-sharing {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.social-sharing button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.twitter-button {
+  background-color: #1da1f2;
+  color: white;
+}
+
+.telegram-button {
+  background-color: #0088cc;
+  color: white;
+}
+
+.referral-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.social-sharing button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.connect-wallet {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.fire-icon {
+  font-size: 4rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.connect-wallet h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.connect-wallet p {
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tabs button {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  padding: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tabs button.active {
+  opacity: 1;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Tab Content */
+.tab-content {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+.no-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Token List */
+.token-list, .nft-list, .domain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.token-item, .nft-item, .domain-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.token-info, .nft-info, .domain-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.token-info img, .nft-info img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.domain-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.token-info h3, .nft-info h3, .domain-info h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.token-info p, .nft-info p, .domain-info p {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.burn-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.burn-button:hover {
+  background-color: #e64a19;
+  transform: translateY(-2px);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.confirmation-modal, .referral-modal {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+}
+
+.confirmation-modal h2, .referral-modal h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.confirmation-content {
+  margin-bottom: 1.5rem;
+}
+
+.item-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.item-details img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.warning {
+  color: var(--warning-color);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.fee-info {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancel-button {
+  flex: 1;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirm-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.success-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: var(--success-color);
+}
+
+/* Referral Modal */
+.referral-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.referral-link {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.referral-link input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-color);
+  border-radius: 4px;
+}
+
+.referral-link button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.referral-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stat {
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.stat h3 {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.stat p {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.footer-links a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .menu-button {
+    display: block;
+  }
+  
+  .wallet-connect {
+    display: none;
+  }
+  
+  .mobile-menu {
+    display: block;
+  }
+  
+  .social-sharing {
+    flex-wrap: wrap;
+  }
+  
+  .social-sharing button {
+    flex: 1;
+    min-width: 100px;
+  }
+}
