@@ -219,4 +219,58 @@ function MemeBlazer() {
  <div className="tab-content">
  {isLoading ? (
  <div className="loading">
- <FaFire className="loading-icon" 
+ <FaFire className="loading-icon" />
+ <p>{statusMessage || 'Loading...'}</p>
+ </div>
+ ) : (
+ activeTab === 'tokens' && (
+ <div className="tokens-tab">
+ {tokens.length === 0 ? (
+ <div className="no-items"><FaExclamationTriangle /><p>No tokens found.</p></div>
+ ) : (
+ <div className="token-list">
+ {tokens.map((token, index) => (
+ <div className="token-item" key={index}>
+ <div className="token-info">
+ <img src={token.image} alt={token.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
+ <div>
+ <h3>{token.symbol}</h3>
+ <p>{token.balance.toLocaleString()} tokens</p>
+ </div>
+ </div>
+ <button className="burn-button" onClick={() => showBurnConfirmation('token', token)}>
+ <FaBurn /> Burn
+ </button>
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
+ )
+ )}
+ </div>
+
+ {showConfirmation && confirmationType === 'token' && selectedToken && (
+ <div className="modal-overlay">
+ <div className="confirmation-modal">
+ <h2><FaFire /> Confirm Burn</h2>
+ <div className="confirmation-content">
+ <p>You are about to burn:</p>
+ <div className="item-details">
+ <img src={selectedToken.image} alt={selectedToken.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
+ <div>
+ <h3>{selectedToken.symbol}</h3>
+ <p>{selectedToken.balance.toLocaleString()} tokens</p>
+ </div>
+ </div>
+ <p className="warning">This action cannot be undone!</p>
+ <p className="fee-info">1% fee supports Meme Blazer.</p>
+ </div>
+ {isLoading ? (
+ <div className="loading">
+ <FaFire className="loading-icon" />
+ <p>{statusMessage || 'Processing...'}</p>
+ </div>
+ ) : transactionSuccess ? (
+ <div className="success-message">
+ <FaFire 
