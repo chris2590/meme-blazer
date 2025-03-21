@@ -1,10 +1,8 @@
 const webpack = require('webpack');
 
 module.exports = function override(config) {
-  // Preserve any existing fallbacks, if they exist, or start with an empty object
+  // Set up fallbacks for Node.js modules
   const fallback = config.resolve.fallback || {};
-  
-  // Assign all necessary module fallbacks
   Object.assign(fallback, {
     "vm": require.resolve("vm-browserify"),
     "http": require.resolve("stream-http"),
@@ -12,19 +10,19 @@ module.exports = function override(config) {
     "https": require.resolve("https-browserify"),
     "url": require.resolve("url/"),
     "stream": require.resolve("stream-browserify"),
-    "crypto": require.resolve("crypto-browserify")
+    "crypto": require.resolve("crypto-browserify"),
+    "buffer": require.resolve("buffer/"),
+    "process": require.resolve("process/browser")
   });
-  
-  // Apply the updated fallbacks to the config
   config.resolve.fallback = fallback;
-  
-  // Add ProvidePlugin to make 'process' and 'Buffer' available globally
+
+  // Provide global variables for process and Buffer
   config.plugins = (config.plugins || []).concat([
     new webpack.ProvidePlugin({
       process: 'process/browser',
       Buffer: ['buffer', 'Buffer'],
     }),
   ]);
-  
+
   return config;
 };
