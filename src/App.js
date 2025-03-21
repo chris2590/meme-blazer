@@ -1,11 +1,11 @@
-// App.js - Fixed for wallet connect
+// App.js - Fixed for wallet connect and @solana/spl-token v0.4.8
 import React, { useState, useEffect, useMemo } from 'react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider, useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, Connection } from '@solana/web3.js';
-import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, createBurnInstruction, getOrCreateAssociatedTokenAccount } from '@solana/spl-token'; // Updated imports
 import { FaBurn, FaFire, FaTwitter, FaTelegram, FaMoneyBillWave, FaLink, FaImage, FaGlobe, FaCoins, FaExclamationTriangle } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import { HiMenu } from 'react-icons/hi';
@@ -95,7 +95,7 @@ function MemeBlazer() {
         .map(account => {
           const { mint, tokenAmount } = account.account.data.parsed.info;
           return {
-            mint,
+            mint: new PublicKey(mint), // Convert to PublicKey
             balance: tokenAmount.uiAmount,
             decimals: tokenAmount.decimals,
             address: account.pubkey.toString(),
@@ -128,27 +128,29 @@ function MemeBlazer() {
   };
 
   const burnToken = async () => {
-    if (!selectedToken || !wallet.connected) return;
+    if (!selectedToken || !wallet.connected || !wallet.publicKey || !wallet.signTransaction) return;
     setIsLoading(true);
     setStatusMessage('Preparing to burn tokens...');
     try {
       const connection = new Connection(RPC_ENDPOINT, 'confirmed');
-      const tokenMint = new PublicKey(selectedToken.mint);
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(wallet.publicKey, { mint: tokenMint });
-      if (tokenAccounts.value.length === 0) throw new Error('Token account not found');
-      const tokenAccount = tokenAccounts.value[0].pubkey;
-      const token = new Token(connection, tokenMint, TOKEN_PROGRAM_ID, wallet.publicKey);
-      const accountInfo = await token.getAccountInfo(tokenAccount);
-      const amountToBurn = accountInfo.amount;
+      const tokenMint = selectedToken.mint;
+      const tokenAccountInfo = await getOrCreateAssociatedTokenAccount(
+        connection,
+        wallet.publicKey,
+        tokenMint,
+        wallet.publicKey
+      );
+      const tokenAccount = tokenAccountInfo.address;
+      const amountToBurn = Math.floor(selectedToken.balance * Math.pow(10, selectedToken.decimals));
 
       const transaction = new Transaction().add(
-        Token.createBurnInstruction(
-          TOKEN_PROGRAM_ID,
-          tokenMint,
+        createBurnInstruction(
           tokenAccount,
+          tokenMint,
           wallet.publicKey,
+          amountToBurn,
           [],
-          amountToBurn
+          TOKEN_PROGRAM_ID
         ),
         SystemProgram.transfer({
           fromPubkey: wallet.publicKey,
@@ -170,7 +172,7 @@ function MemeBlazer() {
       setStatusMessage('Tokens burned successfully! 🔥');
       setTransactionSuccess(true);
       triggerConfetti();
-      setTokens(tokens.filter(t => t.mint !== selectedToken.mint));
+      setTokens(tokens.filter(t => t.mint.toString() !== selectedToken.mint.toString()));
       setSelectedToken(null);
 
       setTimeout(() => {
@@ -237,276 +239,5 @@ function MemeBlazer() {
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
   };
 
-  const shareOnTwitter = () => {
-    const text = `I just burned some worthless tokens on Meme Blazer and reclaimed my SOL! 🔥💰 Join me at https://memeblazer.io @MemeCoinMania77`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const shareOnTelegram = () => {
-    const text = `I just burned some worthless tokens on Meme Blazer and reclaimed my SOL! 🔥💰 Join me!`;
-    window.open(`https://t.me/share/url?url=https://memeblazer.io&text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const openReferralModal = () => setShowReferralModal(true);
-  const closeReferralModal = () => setShowReferralModal(false);
-
-  const copyReferralLink = () => {
-    const referralLink = `https://memeblazer.io?ref=${userReferralCode}`;
-    navigator.clipboard.writeText(referralLink);
-    alert('Referral link copied!');
-  };
-
-  const showBurnConfirmation = (type, item) => {
-    setConfirmationType(type);
-    if (type === 'token') setSelectedToken(item);
-    else if (type === 'nft') setSelectedNFT(item);
-    else if (type === 'domain') setSelectedDomain(item);
-    setShowConfirmation(true);
-  };
-
-  const closeConfirmation = () => {
-    setShowConfirmation(false);
-    setSelectedToken(null);
-    setSelectedNFT(null);
-    setSelectedDomain(null);
-  };
-
-  const confirmBurn = () => {
-    if (confirmationType === 'token') burnToken();
-    else if (confirmationType === 'nft') burnNFT();
-    else if (confirmationType === 'domain') burnDomain();
-  };
-
-  return (
-    <div className="meme-blazer">
-      <header className="header">
-        <div className="logo">
-          <FaFire className="logo-icon" />
-          <div className="logo-text">
-            <h1>Meme Blazer</h1>
-            <p>by Meme Coin Mania</p>
-          </div>
-        </div>
-        <div className="wallet-connect">
-          <WalletMultiButton />
-        </div>
-        <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <IoMdClose /> : <HiMenu />}
-        </button>
-      </header>
-
-      {isMenuOpen && (
-        <div className="mobile-menu">
-          <div className="menu-items">
-            <button onClick={() => { setActiveTab('tokens'); setIsMenuOpen(false); }}><FaCoins /> Tokens</button>
-            <button onClick={() => { setActiveTab('nfts'); setIsMenuOpen(false); }}><FaImage /> NFTs</button>
-            <button onClick={() => { setActiveTab('domains'); setIsMenuOpen(false); }}><FaGlobe /> Domains</button>
-            <button onClick={() => { openReferralModal(); setIsMenuOpen(false); }}><FaMoneyBillWave /> Referrals</button>
-          </div>
-        </div>
-      )}
-
-      <div className="social-sharing">
-        <button className="twitter-button" onClick={shareOnTwitter}><FaTwitter /> Tweet</button>
-        <button className="telegram-button" onClick={shareOnTelegram}><FaTelegram /> Telegram</button>
-        <button className="referral-button" onClick={openReferralModal}><FaMoneyBillWave /> Refer</button>
-      </div>
-
-      <main className="main-content">
-        {!wallet.connected ? (
-          <div className="connect-wallet">
-            <FaFire className="fire-icon" />
-            <h2>Connect Your Wallet to Start Burning</h2>
-            <p>Burn your worthless meme coins, NFTs, and domains while reclaiming valuable SOL.</p>
-            <WalletMultiButton />
-          </div>
-        ) : (
-          <>
-            <div className="tabs">
-              <button className={activeTab === 'tokens' ? 'active' : ''} onClick={() => setActiveTab('tokens')}><FaCoins /> Tokens</button>
-              <button className={activeTab === 'nfts' ? 'active' : ''} onClick={() => setActiveTab('nfts')}><FaImage /> NFTs</button>
-              <button className={activeTab === 'domains' ? 'active' : ''} onClick={() => setActiveTab('domains')}><FaGlobe /> Domains</button>
-            </div>
-
-            <div className="tab-content">
-              {isLoading ? (
-                <div className="loading">
-                  <FaFire className="loading-icon" />
-                  <p>{statusMessage || 'Loading...'}</p>
-                </div>
-              ) : (
-                <>
-                  {activeTab === 'tokens' && (
-                    <div className="tokens-tab">
-                      {tokens.length === 0 ? (
-                        <div className="no-items"><FaExclamationTriangle /><p>No tokens found.</p></div>
-                      ) : (
-                        <div className="token-list">
-                          {tokens.map((token, index) => (
-                            <div className="token-item" key={index}>
-                              <div className="token-info">
-                                <img src={token.image} alt={token.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
-                                <div>
-                                  <h3>{token.symbol}</h3>
-                                  <p>{token.balance.toLocaleString()} tokens</p>
-                                </div>
-                              </div>
-                              <button className="burn-button" onClick={() => showBurnConfirmation('token', token)}><FaBurn /> Burn</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === 'nfts' && (
-                    <div className="nfts-tab">
-                      {nfts.length === 0 ? (
-                        <div className="no-items"><FaExclamationTriangle /><p>No NFTs found.</p></div>
-                      ) : (
-                        <div className="nft-list">
-                          {nfts.map((nft, index) => (
-                            <div className="nft-item" key={index}>
-                              <div className="nft-info">
-                                <img src={nft.image} alt={nft.name} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
-                                <div>
-                                  <h3>{nft.name}</h3>
-                                  <p>{nft.collection}</p>
-                                </div>
-                              </div>
-                              <button className="burn-button" onClick={() => showBurnConfirmation('nft', nft)}><FaBurn /> Burn</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === 'domains' && (
-                    <div className="domains-tab">
-                      {domains.length === 0 ? (
-                        <div className="no-items"><FaExclamationTriangle /><p>No domains found.</p></div>
-                      ) : (
-                        <div className="domain-list">
-                          {domains.map((domain, index) => (
-                            <div className="domain-item" key={index}>
-                              <div className="domain-info">
-                                <FaGlobe className="domain-icon" />
-                                <div>
-                                  <h3>{domain.name}</h3>
-                                  <p>Expires: {domain.expiry}</p>
-                                </div>
-                              </div>
-                              <button className="burn-button" onClick={() => showBurnConfirmation('domain', domain)}><FaBurn /> Burn</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </>
-        )}
-      </main>
-
-      {showConfirmation && (
-        <div className="modal-overlay">
-          <div className="confirmation-modal">
-            <h2><FaFire /> Confirm Burn</h2>
-            {confirmationType === 'token' && selectedToken && (
-              <div className="confirmation-content">
-                <p>You are about to burn:</p>
-                <div className="item-details">
-                  <img src={selectedToken.image} alt={selectedToken.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
-                  <div>
-                    <h3>{selectedToken.symbol}</h3>
-                    <p>{selectedToken.balance.toLocaleString()} tokens</p>
-                  </div>
-                </div>
-                <p className="warning">This action cannot be undone!</p>
-                <p className="fee-info">1% fee supports Meme Blazer.</p>
-              </div>
-            )}
-            {confirmationType === 'nft' && selectedNFT && (
-              <div className="confirmation-content">
-                <p>You are about to burn:</p>
-                <div className="item-details">
-                  <img src={selectedNFT.image} alt={selectedNFT.name} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
-                  <div>
-                    <h3>{selectedNFT.name}</h3>
-                    <p>{selectedNFT.collection}</p>
-                  </div>
-                </div>
-                <p className="warning">This action cannot be undone!</p>
-                <p className="fee-info">1% fee supports Meme Blazer.</p>
-              </div>
-            )}
-            {confirmationType === 'domain' && selectedDomain && (
-              <div className="confirmation-content">
-                <p>You are about to burn:</p>
-                <div className="item-details">
-                  <FaGlobe className="domain-icon" />
-                  <div>
-                    <h3>{selectedDomain.name}</h3>
-                    <p>Expires: {selectedDomain.expiry}</p>
-                  </div>
-                </div>
-                <p className="warning">This action cannot be undone!</p>
-                <p className="fee-info">1% fee supports Meme Blazer.</p>
-              </div>
-            )}
-            {isLoading ? (
-              <div className="loading">
-                <FaFire className="loading-icon" />
-                <p>{statusMessage || 'Processing...'}</p>
-              </div>
-            ) : transactionSuccess ? (
-              <div className="success-message">
-                <FaFire className="success-icon" />
-                <p>{statusMessage || 'Burn successful! 🔥'}</p>
-              </div>
-            ) : (
-              <div className="confirmation-buttons">
-                <button className="cancel-button" onClick={closeConfirmation}>Cancel</button>
-                <button className="confirm-button" onClick={confirmBurn}><FaBurn /> Burn It!</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showReferralModal && (
-        <div className="modal-overlay">
-          <div className="referral-modal">
-            <button className="close-button" onClick={closeReferralModal}><IoMdClose /></button>
-            <h2><FaMoneyBillWave /> Referral Program</h2>
-            <div className="referral-content">
-              <p>Share your referral link and earn rewards!</p>
-              <div className="referral-link">
-                <input type="text" value={`https://memeblazer.io?ref=${userReferralCode}`} readOnly />
-                <button onClick={copyReferralLink}><FaLink /> Copy</button>
-              </div>
-              <div className="referral-stats">
-                <div className="stat"><h3>Referrals</h3><p>{referralStats.count}</p></div>
-                <div className="stat"><h3>Earnings</h3><p>{referralStats.earnings.toFixed(4)} SOL</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <footer className="footer">
-        <p>© 2025 Meme Coin Mania. All rights reserved.</p>
-        <div className="footer-links">
-          <a href="https://twitter.com/memecoinmania77" target="_blank" rel="noopener noreferrer">Twitter</a>
-          <span>•</span>
-          <a href="https://t.me/memecoinmaniadex" target="_blank" rel="noopener noreferrer">Telegram</a>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-export default App;
+  const shareOnTwitter = ()
+     
