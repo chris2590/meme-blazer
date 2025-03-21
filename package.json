@@ -34,6 +34,6 @@
     "canvas-confetti": "^1.9.3"
   },
   "engines": {
-    "node": "20.18.0"
+    "node": "22.x"
   }
 }
