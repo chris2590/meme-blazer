@@ -35,6 +35,12 @@ function App() {
   // Debug wallet init
   useEffect(() => {
     console.log('Wallets initialized:', wallets.map(w => ({ name: w.name, readyState: w.readyState })));
+    wallets.forEach(wallet => {
+      console.log(`${wallet.name} readyState:`, wallet.readyState);
+      wallet.on('connect', () => console.log(`${wallet.name} connected`));
+      wallet.on('disconnect', () => console.log(`${wallet.name} disconnected`));
+      wallet.on('error', (err) => console.error(`${wallet.name} error:`, err));
+    });
   }, [wallets]);
 
   return (
@@ -82,11 +88,11 @@ function MemeBlazer() {
       generateUserReferralCode();
       fetchUserAssets();
     } else if (wallet.wallet && !wallet.connected) {
-      console.log('Attempting wallet connect...');
-      wallet.connect().catch((err) => {
-        console.error('Wallet connect failed:', err);
-        setStatusMessage('Wallet connection failed. Install Phantom or Solflare!');
-      });
+      console.log('No wallet connected, autoConnect should trigger...');
+      setStatusMessage('Connect your wallet to start burning!');
+    } else {
+      console.log('No wallet detected at all—install Phantom or Solflare!');
+      setStatusMessage('No wallet detected. Install Phantom or Solflare!');
     }
   }, [wallet.connected, wallet.publicKey, wallet.wallet]);
 
@@ -158,4 +164,154 @@ function MemeBlazer() {
         SystemProgram.transfer({
           fromPubkey: wallet.publicKey,
           toPubkey: FEE_WALLET,
-          lamports: Math.floor(LAMPORTS_PER_SOL * FEE_PERCENTAGE / 100
+          lamports: Math.floor(LAMPORTS_PER_SOL * FEE_PERCENTAGE / 100)
+        })
+      );
+
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = wallet.publicKey;
+
+      setStatusMessage('Please approve in your wallet...');
+      const signed = await wallet.signTransaction(transaction);
+      const signature = await connection.sendRawTransaction(signed.serialize());
+      setStatusMessage('Burning tokens...');
+      await connection.confirmTransaction(signature, 'confirmed');
+
+      setStatusMessage('Tokens burned successfully! 🔥');
+      setTransactionSuccess(true);
+      triggerConfetti();
+      setTokens(tokens.filter(t => t.mint.toString() !== selectedToken.mint.toString()));
+      setSelectedToken(null);
+
+      setTimeout(() => {
+        setShowConfirmation(false);
+        setTransactionSuccess(false);
+        setStatusMessage('');
+      }, 3000);
+    } catch (error) {
+      console.error('Burn error:', error);
+      setStatusMessage(`Error: ${error.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  const triggerConfetti = () => {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+  };
+
+  const showBurnConfirmation = (type, item) => {
+    setConfirmationType(type);
+    if (type === 'token') setSelectedToken(item);
+    setShowConfirmation(true);
+  };
+
+  return (
+    <div className="meme-blazer">
+      <header className="header">
+        <div className="logo">
+          <FaFire className="logo-icon" />
+          <div className="logo-text">
+            <h1>Meme Blazer</h1>
+            <p>by Meme Coin Mania</p>
+          </div>
+        </div>
+        <div className="wallet-connect">
+          <WalletMultiButton />
+        </div>
+        <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <IoMdClose /> : <HiMenu />}
+        </button>
+      </header>
+
+      {wallet.connected ? (
+        <main className="main-content">
+          <div className="tabs">
+            <button className={activeTab === 'tokens' ? 'active' : ''} onClick={() => setActiveTab('tokens')}>
+              <FaCoins /> Tokens
+            </button>
+          </div>
+
+          <div className="tab-content">
+            {isLoading ? (
+              <div className="loading">
+                <FaFire className="loading-icon" />
+                <p>{statusMessage || 'Loading...'}</p>
+              </div>
+            ) : (
+              activeTab === 'tokens' && (
+                <div className="tokens-tab">
+                  {tokens.length === 0 ? (
+                    <div className="no-items"><FaExclamationTriangle /><p>No tokens found.</p></div>
+                  ) : (
+                    <div className="token-list">
+                      {tokens.map((token, index) => (
+                        <div className="token-item" key={index}>
+                          <div className="token-info">
+                            <img src={token.image} alt={token.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
+                            <div>
+                              <h3>{token.symbol}</h3>
+                              <p>{token.balance.toLocaleString()} tokens</p>
+                            </div>
+                          </div>
+                          <button className="burn-button" onClick={() => showBurnConfirmation('token', token)}>
+                            <FaBurn /> Burn
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+
+          {showConfirmation && confirmationType === 'token' && selectedToken && (
+            <div className="modal-overlay">
+              <div className="confirmation-modal">
+                <h2><FaFire /> Confirm Burn</h2>
+                <div className="confirmation-content">
+                  <p>You are about to burn:</p>
+                  <div className="item-details">
+                    <img src={selectedToken.image} alt={selectedToken.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
+                    <div>
+                      <h3>{selectedToken.symbol}</h3>
+                      <p>{selectedToken.balance.toLocaleString()} tokens</p>
+                    </div>
+                  </div>
+                  <p className="warning">This action cannot be undone!</p>
+                  <p className="fee-info">1% fee supports Meme Blazer.</p>
+                </div>
+                {isLoading ? (
+                  <div className="loading">
+                    <FaFire className="loading-icon" />
+                    <p>{statusMessage || 'Processing...'}</p>
+                  </div>
+                ) : transactionSuccess ? (
+                  <div className="success-message">
+                    <FaFire className="success-icon" />
+                    <p>{statusMessage || 'Burn successful! 🔥'}</p>
+                  </div>
+                ) : (
+                  <div className="confirmation-buttons">
+                    <button className="cancel-button" onClick={() => setShowConfirmation(false)}>Cancel</button>
+                    <button className="confirm-button" onClick={burnToken}><FaBurn /> Burn It!</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      ) : (
+        <div className="connect-wallet">
+          <FaFire className="fire-icon" />
+          <h2>Connect Your Wallet to Start Burning</h2>
+          <p>Burn your worthless meme coins, NFTs, and domains while reclaiming valuable SOL.</p>
+          <WalletMultiButton />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
