@@ -9,6 +9,7 @@ import { FaBurn, FaFire, FaTwitter, FaTelegram, FaMoneyBillWave, FaLink, FaImage
 import { IoMdClose } from 'react-icons/io';
 import { HiMenu } from 'react-icons/hi';
 import confetti from 'canvas-confetti';
+import dogeCoinStack from './doge-coin-stack.png'; // Add the image to your project
 import './App.css';
 
 // SHA-256 for referral code
@@ -88,10 +89,13 @@ function MemeBlazer() {
       generateUserReferralCode();
       fetchUserAssets();
     } else if (wallet.wallet && !wallet.connected) {
-      console.log('No wallet connected, autoConnect should trigger...');
-      setStatusMessage('Connect your wallet to start burning!');
+      console.log('Attempting wallet connect...');
+      wallet.connect().catch((err) => {
+        console.error('Wallet connect failed:', err);
+        setStatusMessage('Wallet connection failed. Install Phantom or Solflare!');
+      });
     } else {
-      console.log('No wallet detected at all—install Phantom or Solflare!');
+      console.log('No wallet detected—install Phantom or Solflare!');
       setStatusMessage('No wallet detected. Install Phantom or Solflare!');
     }
   }, [wallet.connected, wallet.publicKey, wallet.wallet]);
@@ -210,7 +214,7 @@ function MemeBlazer() {
     <div className="meme-blazer">
       <header className="header">
         <div className="logo">
-          <FaFire className="logo-icon" />
+          <img src={dogeCoinStack} alt="Doge Coin Stack" className="logo-image" />
           <div className="logo-text">
             <h1>Meme Blazer</h1>
             <p>by Meme Coin Mania</p>
@@ -235,7 +239,7 @@ function MemeBlazer() {
           <div className="tab-content">
             {isLoading ? (
               <div className="loading">
-                <FaFire className="loading-icon" />
+                <FaFire className="loading-icon animate-flame" />
                 <p>{statusMessage || 'Loading...'}</p>
               </div>
             ) : (
@@ -275,7 +279,7 @@ function MemeBlazer() {
                   <div className="item-details">
                     <img src={selectedToken.image} alt={selectedToken.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
                     <div>
-                      <h3>{selectedToken.symbol}</h3>
+                      <h3>{token.symbol}</h3>
                       <p>{selectedToken.balance.toLocaleString()} tokens</p>
                     </div>
                   </div>
@@ -284,12 +288,12 @@ function MemeBlazer() {
                 </div>
                 {isLoading ? (
                   <div className="loading">
-                    <FaFire className="loading-icon" />
+                    <FaFire className="loading-icon animate-flame" />
                     <p>{statusMessage || 'Processing...'}</p>
                   </div>
                 ) : transactionSuccess ? (
                   <div className="success-message">
-                    <FaFire className="success-icon" />
+                    <FaFire className="success-icon animate-flame" />
                     <p>{statusMessage || 'Burn successful! 🔥'}</p>
                   </div>
                 ) : (
@@ -304,7 +308,8 @@ function MemeBlazer() {
         </main>
       ) : (
         <div className="connect-wallet">
-          <FaFire className="fire-icon" />
+          <FaFire className="fire-icon animate-flame" />
+          <img src={dogeCoinStack} alt="Doge Coin Stack" className="connect-image animate-coin-stack" />
           <h2>Connect Your Wallet to Start Burning</h2>
           <p>Burn your worthless meme coins, NFTs, and domains while reclaiming valuable SOL.</p>
           <WalletMultiButton />
