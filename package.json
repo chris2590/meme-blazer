@@ -16,6 +16,8 @@
     "react-app-rewired": "^2.2.1",
     "@solana/web3.js": "^1.95.3",
     "@solana/spl-token": "^0.4.8",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
     "vm-browserify": "^1.1.2",
     "stream-http": "^3.2.0",
     "browserify-zlib": "^0.2.0",
