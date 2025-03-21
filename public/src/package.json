@@ -1,31 +1,39 @@
 {
   "name": "meme-blazer",
   "version": "1.0.0",
-  "description": "The ultimate degen playground where meme coins go to die and wallets go to thrive!",
+  "private": true,
+  "description": "A React app for burning tokens and NFTs on Solana",
   "main": "index.js",
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test"
+  },
   "dependencies": {
-    "@solana/wallet-adapter-base": "^0.9.23",
-    "@solana/wallet-adapter-react": "^0.15.35",
-    "@solana/wallet-adapter-react-ui": "^0.9.34",
-    "@solana/wallet-adapter-wallets": "^0.19.25",
-    "@solana/web3.js": "^1.87.6",
-    "@solana/spl-token": "^0.3.8",
-    "canvas-confetti": "^1.9.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.12.0"
+    "react-scripts": "5.0.1",
+    "react-app-rewired": "^2.2.1",
+    "@solana/web3.js": "^1.95.3",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/wallet-adapter-base": "^0.9.24",
+    "@solana/wallet-adapter-react": "^0.15.36",
+    "@solana/wallet-adapter-react-ui": "^0.9.36",
+    "@solana/wallet-adapter-wallets": "^0.19.34",
+    "ajv": "^8.12.0",
+    "vm-browserify": "^1.1.2",
+    "stream-http": "^3.2.0",
+    "browserify-zlib": "^0.2.0",
+    "https-browserify": "^1.0.0",
+    "url": "^0.11.0",
+    "stream-browserify": "^3.0.0",
+    "crypto-browserify": "^3.12.0",
+    "process": "^0.11.10",
+    "buffer": "^6.0.3",
+    "react-icons": "^4.12.0",
+    "canvas-confetti": "^1.9.3"
   },
-  "devDependencies": {
-    "react-scripts": "5.0.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  "engines": {
+    "node": "20.18.0"
   }
 }
