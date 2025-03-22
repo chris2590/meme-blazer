@@ -1,11 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { ConnectionProvider, WalletProvider, useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { clusterApiUrl, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import React, { useState, useEffect } from 'react';
+import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getOrCreateAssociatedTokenAccount, createBurnInstruction, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { FaBurn, FaFire, FaTwitter, FaTelegram, FaMoneyBillWave, FaLink, FaImage, FaGlobe, FaCoins, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBurn, FaFire, FaCoins, FaExclamationTriangle } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import { HiMenu } from 'react-icons/hi';
 import confetti from 'canvas-confetti';
@@ -21,130 +17,81 @@ const sha256 = async (message) => {
 };
 
 // Constants
-const DEFAULT_RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Fallback RPC
-const RPC_ENDPOINT = process.env.REACT_APP_RPC_ENDPOINT || DEFAULT_RPC_ENDPOINT;
+const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Swap with Alchemy if needed
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const FEE_PERCENTAGE = 1;
 
 function App() {
-  const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = RPC_ENDPOINT || clusterApiUrl(network);
-  const wallets = useMemo(() => [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter()
-  ], []);
-
-  useEffect(() => {
-    console.log('Wallets initialized:', wallets.map(w => ({ name: w.name, readyState: w.readyState })));
-    wallets.forEach(wallet => {
-      console.log(`${wallet.name} readyState:`, wallet.readyState);
-      wallet.on('connect', () => console.log(`${wallet.name} connected`));
-      wallet.on('disconnect', () => console.log(`${wallet.name} disconnected`));
-      wallet.on('error', (err) => console.error(`${wallet.name} error:`, err));
-    });
-  }, [wallets]);
-
-  return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={false}>
-        <WalletModalProvider>
-          <div className="app">
-            <MemeBlazer />
-          </div>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
-  );
-}
-
-function MemeBlazer() {
-  const { connection } = useConnection();
-  const wallet = useWallet();
+  const [connection, setConnection] = useState(null);
+  const [wallet, setWallet] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [tokens, setTokens] = useState([]);
-  const [nfts, setNfts] = useState([]);
-  const [domains, setDomains] = useState([]);
-  const [activeTab, setActiveTab] = useState('tokens');
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [transactionSuccess, setTransactionSuccess] = useState(false);
   const [selectedToken, setSelectedToken] = useState(null);
-  const [selectedNFT, setSelectedNFT] = useState(null);
-  const [selectedDomain, setSelectedDomain] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [confirmationType, setConfirmationType] = useState('');
-  const [burnAmount, setBurnAmount] = useState('');
-  const [showReferralModal, setShowReferralModal] = useState(false);
   const [userReferralCode, setUserReferralCode] = useState('');
-  const [referralStats] = useState({ count: 0, earnings: 0 });
 
-  // Manual connect with direct Phantom/Solflare check
-  const handleConnect = async () => {
-    if (wallet.wallet) {
-      try {
-        await wallet.connect();
-        setStatusMessage('Wallet connected successfully!');
-      } catch (err) {
-        console.error('Wallet connect failed:', err);
-        setStatusMessage(`Connection failed: ${err.message}`);
+  // Connect to Solana RPC
+  useEffect(() => {
+    const conn = new window.solanaWeb3.Connection(RPC_ENDPOINT, 'confirmed');
+    setConnection(conn);
+  }, []);
+
+  // Wallet connection logic
+  const connectWallet = async () => {
+    setIsLoading(true);
+    setStatusMessage('Connecting wallet...');
+    try {
+      let solanaWallet = null;
+      if (window.solana && window.solana.isPhantom) {
+        solanaWallet = window.solana;
+        console.log('Phantom detected');
+      } else if (window.solflare && window.solflare.isSolflare) {
+        solanaWallet = window.solflare;
+        console.log('Solflare detected');
+      } else {
+        throw new Error('No Solana wallet detected. Install Phantom or Solflare!');
       }
-    } else if (window.solana && window.solana.isPhantom) {
-      try {
-        await window.solana.connect();
-        setStatusMessage('Phantom connected manually!');
-      } catch (err) {
-        console.error('Phantom manual connect failed:', err);
-        setStatusMessage(`Phantom connect failed: ${err.message}`);
-      }
-    } else if (window.solflare && window.solflare.isSolflare) {
-      try {
-        await window.solflare.connect();
-        setStatusMessage('Solflare connected manually!');
-      } catch (err) {
-        console.error('Solflare manual connect failed:', err);
-        setStatusMessage(`Solflare connect failed: ${err.message}`);
-      }
-    } else {
-      setStatusMessage('No Solana wallet detected. Install Phantom or Solflare!');
+
+      await solanaWallet.connect();
+      setWallet(solanaWallet);
+      setStatusMessage('Wallet connected: ' + solanaWallet.publicKey.toString());
+      console.log('Wallet connected:', solanaWallet.publicKey.toString());
+      generateUserReferralCode(solanaWallet.publicKey);
+      fetchUserAssets(solanaWallet.publicKey);
+    } catch (err) {
+      console.error('Wallet connect failed:', err);
+      setStatusMessage(`Connection failed: ${err.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    console.log('Wallet state:', { 
-      connected: wallet.connected, 
-      publicKey: wallet.publicKey?.toString(), 
-      walletReady: wallet.wallet?.readyState 
-    });
-    if (wallet.connected && wallet.publicKey) {
-      console.log('Wallet connected:', wallet.publicKey.toString());
-      generateUserReferralCode();
-      fetchUserAssets();
-    } else if (wallet.wallet && wallet.wallet.readyState === 'Installed') {
-      console.log('Wallet detected but not connected');
-      setStatusMessage('Wallet detected! Click "Connect Wallet" or "Manual Connect" to proceed.');
-    } else if (window.solana || window.solflare) {
-      console.log('Native Solana wallet detected');
-      setStatusMessage('Native wallet detected! Use "Manual Connect" if the button fails.');
-    } else {
-      console.log('No wallet detected—install Phantom or Solflare!');
-      setStatusMessage('No wallet detected. Install Phantom or Solflare!');
+  const disconnectWallet = () => {
+    if (wallet) {
+      wallet.disconnect();
+      setWallet(null);
+      setTokens([]);
+      setStatusMessage('Wallet disconnected');
     }
-  }, [wallet.connected, wallet.publicKey, wallet.wallet]);
+  };
 
-  const generateUserReferralCode = async () => {
-    if (wallet.publicKey) {
-      const hash = await sha256(wallet.publicKey.toString());
+  const generateUserReferralCode = async (publicKey) => {
+    if (publicKey) {
+      const hash = await sha256(publicKey.toString());
       setUserReferralCode(hash.substring(0, 8));
     }
   };
 
-  const fetchUserAssets = async () => {
-    if (!wallet.connected || !wallet.publicKey) return;
+  const fetchUserAssets = async (publicKey) => {
+    if (!publicKey || !connection) return;
     setIsLoading(true);
     setStatusMessage('Loading your assets...');
     try {
       const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-        wallet.publicKey,
+        publicKey,
         { programId: TOKEN_PROGRAM_ID }
       );
       const userTokens = tokenAccounts.value
@@ -163,14 +110,131 @@ function MemeBlazer() {
         });
       console.log('Fetched tokens:', userTokens);
       setTokens(userTokens);
-      setIsLoading(false);
       setStatusMessage('');
     } catch (error) {
       console.error('Error fetching assets:', error);
       setStatusMessage(`Error loading assets: ${error.message}`);
+    } finally {
       setIsLoading(false);
     }
   };
 
   const burnToken = async () => {
-    if (!selectedToken || !wallet.connected || !wallet.publicKey || !wallet.sign
+    if (!selectedToken || !wallet || !connection) return;
+    setIsLoading(true);
+    setStatusMessage('Preparing to burn tokens...');
+    try {
+      const tokenMint = selectedToken.mint;
+      const tokenAccountInfo = await getOrCreateAssociatedTokenAccount(
+        connection,
+        wallet.publicKey,
+        tokenMint,
+        wallet.publicKey
+      );
+      const tokenAccount = tokenAccountInfo.address;
+      const amountToBurn = Math.floor(selectedToken.balance * Math.pow(10, selectedToken.decimals));
+
+      const transaction = new Transaction().add(
+        createBurnInstruction(
+          tokenAccount,
+          tokenMint,
+          wallet.publicKey,
+          amountToBurn,
+          [],
+          TOKEN_PROGRAM_ID
+        ),
+        SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: FEE_WALLET,
+          lamports: Math.floor(LAMPORTS_PER_SOL * FEE_PERCENTAGE / 100)
+        })
+      );
+
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = wallet.publicKey;
+
+      setStatusMessage('Please approve in your wallet...');
+      const signed = await wallet.signTransaction(transaction);
+      const signature = await connection.sendRawTransaction(signed.serialize());
+      setStatusMessage('Burning tokens...');
+      await connection.confirmTransaction(signature, 'confirmed');
+
+      setStatusMessage('Tokens burned successfully! 🔥');
+      setTransactionSuccess(true);
+      triggerConfetti();
+      setTokens(tokens.filter(t => t.mint.toString() !== selectedToken.mint.toString()));
+      setSelectedToken(null);
+
+      setTimeout(() => {
+        setShowConfirmation(false);
+        setTransactionSuccess(false);
+        setStatusMessage('');
+      }, 3000);
+    } catch (error) {
+      console.error('Burn error:', error);
+      setStatusMessage(`Error: ${error.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  const triggerConfetti = () => {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+  };
+
+  const showBurnConfirmation = (item) => {
+    setSelectedToken(item);
+    setShowConfirmation(true);
+  };
+
+  return (
+    <div className="meme-blazer">
+      <header className="header">
+        <div className="logo">
+          <img src={dogeCoinStack} alt="Doge Coin Stack" className="logo-image animate-coin-stack" />
+          <div className="logo-text">
+            <h1>Meme Blazer</h1>
+            <p>by Meme Coin Mania</p>
+          </div>
+        </div>
+        <div className="wallet-connect">
+          {wallet ? (
+            <button className="disconnect-button" onClick={disconnectWallet}>Disconnect</button>
+          ) : (
+            <button className="connect-button" onClick={connectWallet}>Connect Wallet</button>
+          )}
+        </div>
+        <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <IoMdClose /> : <HiMenu />}
+        </button>
+      </header>
+
+      {wallet && wallet.publicKey ? (
+        <main className="main-content">
+          <div className="tabs">
+            <button className="active"><FaCoins /> Tokens</button>
+          </div>
+
+          <div className="tab-content">
+            {isLoading ? (
+              <div className="loading">
+                <FaFire className="loading-icon animate-flame" />
+                <p>{statusMessage || 'Loading...'}</p>
+              </div>
+            ) : (
+              <div className="tokens-tab">
+                {tokens.length === 0 ? (
+                  <div className="no-items"><FaExclamationTriangle /><p>No tokens found.</p></div>
+                ) : (
+                  <div className="token-list">
+                    {tokens.map((token, index) => (
+                      <div className="token-item" key={index}>
+                        <div className="token-info">
+                          <img src={token.image} alt={token.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
+                          <div>
+                            <h3>{token.symbol}</h3>
+                            <p>{token.balance.toLocaleString()} tokens</p>
+                          </div>
+                        </div>
+                        <button className="burn-button" onClick={() => showBurnConfirmation(token)}>
+                          <FaBurn /> Burn
