@@ -21,14 +21,14 @@ const sha256 = async (message) => {
 };
 
 // Constants
-const DEFAULT_RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Fallback
+const DEFAULT_RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 const RPC_ENDPOINT = process.env.REACT_APP_RPC_ENDPOINT || DEFAULT_RPC_ENDPOINT; // Use Netlify env var if set
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const FEE_PERCENTAGE = 1;
 
 function App() {
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = RPC_ENDPOINT || clusterApiUrl(network); // Use custom RPC or fallback to clusterApiUrl
+  const endpoint = RPC_ENDPOINT || clusterApiUrl(network);
   const wallets = useMemo(() => [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter()
@@ -47,7 +47,7 @@ function App() {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={false}> {/* Changed to false for manual connect */}
+      <WalletProvider wallets={wallets} autoConnect={false}> {/* Manual connect */}
         <WalletModalProvider>
           <div className="app">
             <MemeBlazer />
@@ -90,11 +90,11 @@ function MemeBlazer() {
       generateUserReferralCode();
       fetchUserAssets();
     } else if (wallet.wallet && !wallet.connected) {
-      console.log('Wallet detected but not connected. Please use the button to connect.');
+      console.log('Wallet detected but not connected');
       setStatusMessage('Wallet detected! Click "Connect Wallet" to proceed.');
     } else {
       console.log('No wallet detected—install Phantom or Solflare!');
-      setStatusMessage('No wallet detected. Install Phantom or Solflare to continue!');
+      setStatusMessage('No wallet detected. Install Phantom or Solflare!');
     }
   }, [wallet.connected, wallet.publicKey, wallet.wallet]);
 
@@ -123,7 +123,7 @@ function MemeBlazer() {
             balance: tokenAmount.uiAmount,
             decimals: tokenAmount.decimals,
             address: account.pubkey.toString(),
-            symbol: 'Unknown', // Could fetch metadata for symbol if needed
+            symbol: 'Unknown',
             name: 'Unknown',
             image: `https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${mint}/logo.png`
           };
@@ -291,4 +291,32 @@ function MemeBlazer() {
                   </div>
                 ) : transactionSuccess ? (
                   <div className="success-message">
-                    <FaFire className="success-icon animate
+                    <FaFire className="success-icon animate-flame" />
+                    <p>{statusMessage || 'Burn successful! 🔥'}</p>
+                  </div>
+                ) : (
+                  <div className="confirmation-buttons">
+                    <button className="cancel-button" onClick={() => setShowConfirmation(false)}>Cancel</button>
+                    <button className="confirm-button" onClick={burnToken}><FaBurn /> Burn It!</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      ) : (
+        <div className="connect-wallet">
+          <div className="hero">
+            <img src={dogeCoinStack} alt="Doge Coin Stack" className="connect-image animate-coin-stack" />
+            <h2>Connect Your Wallet to Start Burning</h2>
+            <p>Burn your worthless meme coins, NFTs, and domains while reclaiming valuable SOL.</p>
+          </div>
+          <WalletMultiButton />
+          {statusMessage && <p className="status-message">{statusMessage}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
