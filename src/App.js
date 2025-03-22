@@ -8,15 +8,6 @@ import confetti from 'canvas-confetti';
 import dogeCoinStack from './doge-coin-stack.png';
 import './App.css';
 
-// SHA-256 for referral code (unused here but kept for your future use)
-const sha256 = async (message) => {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
-
-// Constants
 const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const FEE_PERCENTAGE = 1;
@@ -32,14 +23,12 @@ function App() {
   const [selectedToken, setSelectedToken] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Connect to Solana RPC
   useEffect(() => {
     const conn = new window.solanaWeb3.Connection(RPC_ENDPOINT, 'confirmed');
     setConnection(conn);
     console.log('Connection established:', RPC_ENDPOINT);
   }, []);
 
-  // Wallet connection
   const connectWallet = async () => {
     setIsLoading(true);
     setStatusMessage('Connecting wallet...');
@@ -54,7 +43,6 @@ function App() {
       } else {
         throw new Error('No Solana wallet found. Install Phantom or Solflare!');
       }
-
       await solanaWallet.connect();
       setWallet(solanaWallet);
       setStatusMessage('Connected: ' + solanaWallet.publicKey.toString());
@@ -125,7 +113,6 @@ function App() {
       );
       const tokenAccount = tokenAccountInfo.address;
       const amountToBurn = Math.floor(selectedToken.balance * Math.pow(10, selectedToken.decimals));
-
       const transaction = new Transaction().add(
         createBurnInstruction(
           tokenAccount,
@@ -141,23 +128,19 @@ function App() {
           lamports: Math.floor(LAMPORTS_PER_SOL * FEE_PERCENTAGE / 100)
         })
       );
-
       const { blockhash } = await connection.getLatestBlockhash();
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = wallet.publicKey;
-
       setStatusMessage('Approve in wallet...');
       const signed = await wallet.signTransaction(transaction);
       const signature = await connection.sendRawTransaction(signed.serialize());
       setStatusMessage('Burning...');
       await connection.confirmTransaction(signature, 'confirmed');
-
       setStatusMessage('Burned! 🔥');
       setTransactionSuccess(true);
       triggerConfetti();
       setTokens(tokens.filter(t => t.mint.toString() !== selectedToken.mint.toString()));
       setSelectedToken(null);
-
       setTimeout(() => {
         setShowConfirmation(false);
         setTransactionSuccess(false);
@@ -197,4 +180,94 @@ function App() {
           )}
         </div>
         <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <IoMdClose /> :
+          {isMenuOpen ? <IoMdClose /> : <HiMenu />}
+        </button>
+      </header>
+      {wallet && wallet.publicKey ? (
+        <main className="main-content">
+          <div className="tabs">
+            <button className="active"><FaCoins /> Tokens</button>
+          </div>
+          <div className="tab-content">
+            {isLoading ? (
+              <div className="loading">
+                <FaFire className="loading-icon animate-flame" />
+                <p>{statusMessage || 'Loading...'}</p>
+              </div>
+            ) : (
+              <div className="tokens-tab">
+                {tokens.length === 0 ? (
+                  <div className="no-items"><FaExclamationTriangle /><p>No tokens found.</p></div>
+                ) : (
+                  <div className="token-list">
+                    {tokens.map((token, index) => (
+                      <div className="token-item" key={index}>
+                        <div className="token-info">
+                          <img src={token.image} alt={token.symbol} onError={(e) => (e.target.src = 'https://via.placeholder.com/40')} />
+                          <div>
+                            <h3>{token.symbol}</h3>
+                            <p>{token.balance.toLocaleString()} tokens</p>
+                          </div>
+                        </div>
+                        <button className="burn-button" onClick={() => showBurnConfirmation(token)}>
+                          <FaBurn /> Burn
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          {showConfirmation && selectedToken && (
+            <div className="modal-overlay">
+              <div className="confirmation-modal">
+                <h2><FaFire /> Confirm Burn</h2>
+                <div className="confirmation-content">
+                  <p>You are about to burn:</p>
+                  <div className="item-details">
+                    <img src={selectedToken.image} alt={selectedToken.symbol} onError={(e) => (e.target.src = 'https://via.placeholder.com/40')} />
+                    <div>
+                      <h3>{selectedToken.symbol}</h3>
+                      <p>{selectedToken.balance.toLocaleString()} tokens</p>
+                    </div>
+                  </div>
+                  <p className="warning">This action cannot be undone!</p>
+                  <p className="fee-info">1% fee supports Meme Blazer.</p>
+                </div>
+                {isLoading ? (
+                  <div className="loading">
+                    <FaFire className="loading-icon animate-flame" />
+                    <p>{statusMessage || 'Processing...'}</p>
+                  </div>
+                ) : transactionSuccess ? (
+                  <div className="success-message">
+                    <FaFire className="success-icon animate-flame" />
+                    <p>{statusMessage || 'Burn successful! 🔥'}</p>
+                  </div>
+                ) : (
+                  <div className="confirmation-buttons">
+                    <button className="cancel-button" onClick={() => setShowConfirmation(false)}>Cancel</button>
+                    <button className="confirm-button" onClick={burnToken}><FaBurn /> Burn It!</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      ) : (
+        <div className="connect-wallet">
+          <div className="hero">
+            <img src={dogeCoinStack} alt="Doge Coin Stack" className="connect-image animate-coin-stack" />
+            <h2>Connect Your Wallet to Start Burning</h2>
+            <p>Burn your worthless meme coins, NFTs, and domains while reclaiming valuable SOL.</p>
+          </div>
+          <button className="connect-button" onClick={connectWallet}>Connect Wallet</button>
+          {statusMessage && <p className="status-message">{statusMessage}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
