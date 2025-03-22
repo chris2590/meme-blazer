@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'; // Explicit import
 import { getOrCreateAssociatedTokenAccount, createBurnInstruction, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { FaBurn, FaFire, FaCoins, FaExclamationTriangle } from 'react-icons/fa';
 import confetti from 'canvas-confetti';
@@ -21,7 +21,7 @@ function App() {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
-    const conn = new window.solanaWeb3.Connection(RPC_ENDPOINT, 'confirmed');
+    const conn = new Connection(RPC_ENDPOINT, 'confirmed'); // Proper class import
     setConnection(conn);
     console.log('Connected to:', RPC_ENDPOINT);
   }, []);
@@ -30,13 +30,10 @@ function App() {
     setIsLoading(true);
     setStatusMessage('Connecting...');
     try {
-      let solanaWallet = null;
-      if (window.solana && window.solana.isPhantom) {
-        solanaWallet = window.solana;
-        console.log('Phantom detected');
-      } else {
-        throw new Error('No Phantom wallet found. Install it.');
+      if (!window.solana || !window.solana.isPhantom) {
+        throw new Error('No Phantom wallet detected. Install it.');
       }
+      const solanaWallet = window.solana;
       await solanaWallet.connect();
       setWallet(solanaWallet);
       setStatusMessage('Connected: ' + solanaWallet.publicKey.toString());
