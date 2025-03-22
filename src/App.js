@@ -8,7 +8,7 @@ import confetti from 'canvas-confetti';
 import dogeCoinStack from './doge-coin-stack.png';
 import './App.css';
 
-// SHA-256 for referral code
+// SHA-256 for referral code (unused here but kept for your future use)
 const sha256 = async (message) => {
   const msgBuffer = new TextEncoder().encode(message);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -17,7 +17,7 @@ const sha256 = async (message) => {
 };
 
 // Constants
-const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"; // Swap with Alchemy if needed
+const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const FEE_PERCENTAGE = 1;
 
@@ -31,15 +31,15 @@ function App() {
   const [transactionSuccess, setTransactionSuccess] = useState(false);
   const [selectedToken, setSelectedToken] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [userReferralCode, setUserReferralCode] = useState('');
 
   // Connect to Solana RPC
   useEffect(() => {
     const conn = new window.solanaWeb3.Connection(RPC_ENDPOINT, 'confirmed');
     setConnection(conn);
+    console.log('Connection established:', RPC_ENDPOINT);
   }, []);
 
-  // Wallet connection logic
+  // Wallet connection
   const connectWallet = async () => {
     setIsLoading(true);
     setStatusMessage('Connecting wallet...');
@@ -52,18 +52,17 @@ function App() {
         solanaWallet = window.solflare;
         console.log('Solflare detected');
       } else {
-        throw new Error('No Solana wallet detected. Install Phantom or Solflare!');
+        throw new Error('No Solana wallet found. Install Phantom or Solflare!');
       }
 
       await solanaWallet.connect();
       setWallet(solanaWallet);
-      setStatusMessage('Wallet connected: ' + solanaWallet.publicKey.toString());
+      setStatusMessage('Connected: ' + solanaWallet.publicKey.toString());
       console.log('Wallet connected:', solanaWallet.publicKey.toString());
-      generateUserReferralCode(solanaWallet.publicKey);
       fetchUserAssets(solanaWallet.publicKey);
     } catch (err) {
-      console.error('Wallet connect failed:', err);
-      setStatusMessage(`Connection failed: ${err.message}`);
+      console.error('Connect failed:', err);
+      setStatusMessage(`Failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -74,21 +73,14 @@ function App() {
       wallet.disconnect();
       setWallet(null);
       setTokens([]);
-      setStatusMessage('Wallet disconnected');
-    }
-  };
-
-  const generateUserReferralCode = async (publicKey) => {
-    if (publicKey) {
-      const hash = await sha256(publicKey.toString());
-      setUserReferralCode(hash.substring(0, 8));
+      setStatusMessage('Disconnected');
     }
   };
 
   const fetchUserAssets = async (publicKey) => {
     if (!publicKey || !connection) return;
     setIsLoading(true);
-    setStatusMessage('Loading your assets...');
+    setStatusMessage('Loading assets...');
     try {
       const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
         publicKey,
@@ -108,12 +100,12 @@ function App() {
             image: `https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/${mint}/logo.png`
           };
         });
-      console.log('Fetched tokens:', userTokens);
+      console.log('Tokens:', userTokens);
       setTokens(userTokens);
       setStatusMessage('');
     } catch (error) {
-      console.error('Error fetching assets:', error);
-      setStatusMessage(`Error loading assets: ${error.message}`);
+      console.error('Fetch assets failed:', error);
+      setStatusMessage(`Error: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +114,7 @@ function App() {
   const burnToken = async () => {
     if (!selectedToken || !wallet || !connection) return;
     setIsLoading(true);
-    setStatusMessage('Preparing to burn tokens...');
+    setStatusMessage('Preparing burn...');
     try {
       const tokenMint = selectedToken.mint;
       const tokenAccountInfo = await getOrCreateAssociatedTokenAccount(
@@ -154,13 +146,13 @@ function App() {
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = wallet.publicKey;
 
-      setStatusMessage('Please approve in your wallet...');
+      setStatusMessage('Approve in wallet...');
       const signed = await wallet.signTransaction(transaction);
       const signature = await connection.sendRawTransaction(signed.serialize());
-      setStatusMessage('Burning tokens...');
+      setStatusMessage('Burning...');
       await connection.confirmTransaction(signature, 'confirmed');
 
-      setStatusMessage('Tokens burned successfully! 🔥');
+      setStatusMessage('Burned! 🔥');
       setTransactionSuccess(true);
       triggerConfetti();
       setTokens(tokens.filter(t => t.mint.toString() !== selectedToken.mint.toString()));
@@ -172,7 +164,7 @@ function App() {
         setStatusMessage('');
       }, 3000);
     } catch (error) {
-      console.error('Burn error:', error);
+      console.error('Burn failed:', error);
       setStatusMessage(`Error: ${error.message}`);
       setIsLoading(false);
     }
@@ -205,36 +197,4 @@ function App() {
           )}
         </div>
         <button className="menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <IoMdClose /> : <HiMenu />}
-        </button>
-      </header>
-
-      {wallet && wallet.publicKey ? (
-        <main className="main-content">
-          <div className="tabs">
-            <button className="active"><FaCoins /> Tokens</button>
-          </div>
-
-          <div className="tab-content">
-            {isLoading ? (
-              <div className="loading">
-                <FaFire className="loading-icon animate-flame" />
-                <p>{statusMessage || 'Loading...'}</p>
-              </div>
-            ) : (
-              <div className="tokens-tab">
-                {tokens.length === 0 ? (
-                  <div className="no-items"><FaExclamationTriangle /><p>No tokens found.</p></div>
-                ) : (
-                  <div className="token-list">
-                    {tokens.map((token, index) => (
-                      <div className="token-item" key={index}>
-                        <div className="token-info">
-                          <img src={token.image} alt={token.symbol} onError={e => e.target.src = 'https://via.placeholder.com/40'} />
-                          <div>
-                            <h3>{token.symbol}</h3>
-                            <p>{token.balance.toLocaleString()} tokens</p>
-                          </div>
-                        </div>
-                        <button className="burn-button" onClick={() => showBurnConfirmation(token)}>
-                          <FaBurn /> Burn
+          {isMenuOpen ? <IoMdClose /> :
