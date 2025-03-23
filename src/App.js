@@ -1,25 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useWallet } from "@solana/wallet-adapter-react";
+import React, { useMemo, useState } from "react";
 import {
-  Connection,
-  clusterApiUrl,
+  ConnectionProvider,
+  WalletProvider
+} from "@solana/wallet-adapter-react";
+import {
+  WalletModalProvider,
+  WalletMultiButton
+} from "@solana/wallet-adapter-react-ui";
+
+import {
+  PhantomWalletAdapter
+} from "@solana/wallet-adapter-phantom";
+import {
+  SolflareWalletAdapter
+} from "@solana/wallet-adapter-solflare";
+
+import {
   PublicKey,
   Transaction,
   SystemProgram,
-  LAMPORTS_PER_SOL
+  LAMPORTS_PER_SOL,
+  clusterApiUrl,
+  Connection
 } from "@solana/web3.js";
 
-const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
+import { useWallet } from "@solana/wallet-adapter-react";
+
+import "@solana/wallet-adapter-react-ui/styles.css";
+
+const QUICKNODE_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
 const BACKUP_RPC = clusterApiUrl("mainnet-beta");
-const connection = new Connection(PRIMARY_RPC, "confirmed");
 
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const BURN_ADDRESS = new PublicKey("11111111111111111111111111111111");
 
-export default function MemeBlazer() {
+function BurnerUI() {
   const { publicKey, sendTransaction } = useWallet();
   const [burning, setBurning] = useState(false);
+  const connection = useMemo(() => new Connection(QUICKNODE_RPC, "confirmed"), []);
 
   const handleTokenBurn = async () => {
     if (!publicKey) return;
@@ -42,12 +60,12 @@ export default function MemeBlazer() {
         })
       );
 
-      const signature = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
+      const sig = await sendTransaction(tx, connection);
+      await connection.confirmTransaction(sig, "confirmed");
       alert("🔥 Burn complete!");
-    } catch (error) {
-      console.error("Burn failed", error);
-      alert("Burn failed — check console.");
+    } catch (err) {
+      console.error(err);
+      alert("Burn failed.");
     }
     setBurning(false);
   };
@@ -58,6 +76,7 @@ export default function MemeBlazer() {
         <h1 className="text-3xl font-bold">🔥 Meme Blazer v2</h1>
         <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
       </header>
+
       {publicKey ? (
         <div className="space-y-4">
           <p className="text-lg">Connected Wallet: {publicKey.toBase58()}</p>
@@ -90,9 +109,27 @@ export default function MemeBlazer() {
       ) : (
         <p className="text-lg">Connect your wallet to begin burning bags 🔥</p>
       )}
+
       <footer className="mt-10 border-t border-gray-700 pt-4 text-center text-sm">
         Follow us on <a href="https://x.com/MemeCoinMania77" className="text-blue-400" target="_blank" rel="noopener noreferrer">@memecoinmania77</a> and join the <a href="https://t.me/memecoinmaniadex" className="text-green-400" target="_blank" rel="noopener noreferrer">Telegram</a>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  const wallets = useMemo(() => [
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter()
+  ], []);
+
+  return (
+    <ConnectionProvider endpoint={QUICKNODE_RPC}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <BurnerUI />
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }
