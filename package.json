@@ -15,7 +15,8 @@
     "@solana/wallet-adapter-solflare": "^0.10.3",
     "@solana/web3.js": "^1.76.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "node-sass": "^8.0.0"
   },
   "devDependencies": {
     "vite": "^4.4.9"
