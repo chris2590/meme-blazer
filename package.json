@@ -11,7 +11,8 @@
     "@solana/wallet-adapter-base": "^0.9.20",
     "@solana/wallet-adapter-react": "^0.15.20",
     "@solana/wallet-adapter-react-ui": "^0.9.20",
-    "@solana/wallet-adapter-wallets": "^0.10.3",
+    "@solana/wallet-adapter-phantom": "^0.10.3",
+    "@solana/wallet-adapter-solflare": "^0.10.3",
     "@solana/web3.js": "^1.76.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
