@@ -10,6 +10,7 @@ import {
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
+// Primary RPC and fallback
 const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
 const connection = new Connection(PRIMARY_RPC, "confirmed");
 
@@ -54,67 +55,57 @@ export default function MemeBlazer() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <header className="flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
-        <h1 className="text-3xl font-bold">Meme Blazer v2</h1>
-        <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
+    <div style={{ minHeight: "100vh", backgroundColor: "black", color: "white", padding: "1rem" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #444", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+        <h1 style={{ fontSize: "1.875rem", fontWeight: "bold" }}>Meme Blazer v2</h1>
+        <WalletMultiButton />
       </header>
 
       {publicKey ? (
-        <div className="space-y-4">
-          <p className="text-lg">Connected Wallet: {publicKey.toBase58()}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p>Connected Wallet: {publicKey.toBase58()}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
             <button
-              className="bg-red-600 hover:bg-red-700 p-4 rounded-xl text-xl"
               onClick={handleTokenBurn}
               disabled={burning}
+              style={{
+                backgroundColor: "#dc2626",
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                fontSize: "1.25rem",
+                color: "white",
+              }}
             >
               {burning ? "Burning..." : "Burn Tokens"}
             </button>
-            <button className="bg-blue-600 hover:bg-blue-700 p-4 rounded-xl text-xl">
+            <button style={{ backgroundColor: "#2563eb", padding: "1rem", borderRadius: "0.75rem", fontSize: "1.25rem", color: "white" }}>
               Burn NFTs
             </button>
-            <button className="bg-green-600 hover:bg-green-700 p-4 rounded-xl text-xl">
+            <button style={{ backgroundColor: "#16a34a", padding: "1rem", borderRadius: "0.75rem", fontSize: "1.25rem", color: "white" }}>
               Burn Domains
             </button>
-            <button className="bg-yellow-600 hover:bg-yellow-700 p-4 rounded-xl text-xl">
+            <button style={{ backgroundColor: "#ca8a04", padding: "1rem", borderRadius: "0.75rem", fontSize: "1.25rem", color: "white" }}>
               Close Rent Accounts
             </button>
           </div>
 
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-2">Referral System</h2>
-            <p className="text-sm">
+          <div style={{ marginTop: "2rem" }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Referral System</h2>
+            <p style={{ fontSize: "0.875rem" }}>
               Share this link to earn rewards: <br />
-              <code className="text-purple-400">
+              <code style={{ color: "#c084fc" }}>
                 https://memeblazer.netlify.app/?ref={publicKey.toBase58()}
               </code>
             </p>
           </div>
         </div>
       ) : (
-        <p className="text-lg">Connect your wallet to begin burning bags.</p>
+        <p>Connect your wallet to begin burning bags.</p>
       )}
 
-      <footer className="mt-10 border-t border-gray-700 pt-4 text-center text-sm">
-        Follow us on{" "}
-        <a
-          href="https://x.com/MemeCoinMania77"
-          className="text-blue-400"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          @memecoinmania77
-        </a>{" "}
-        and join the{" "}
-        <a
-          href="https://t.me/memecoinmaniadex"
-          className="text-green-400"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Telegram
-        </a>
+      <footer style={{ marginTop: "3rem", borderTop: "1px solid #444", paddingTop: "1rem", textAlign: "center", fontSize: "0.875rem" }}>
+        Follow us on <a href="https://x.com/MemeCoinMania77" style={{ color: "#60a5fa" }} target="_blank" rel="noopener noreferrer">@memecoinmania77</a> and join the{" "}
+        <a href="https://t.me/memecoinmaniadex" style={{ color: "#4ade80" }} target="_blank" rel="noopener noreferrer">Telegram</a>
       </footer>
     </div>
   );
