@@ -10,7 +10,7 @@ import {
   LAMPORTS_PER_SOL
 } from "@solana/web3.js";
 
-// Primary and backup RPC endpoints
+// RPC endpoints
 const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
 const BACKUP_RPC = clusterApiUrl("mainnet-beta");
 const connection = new Connection(PRIMARY_RPC, "confirmed");
@@ -27,7 +27,6 @@ export default function MemeBlazer() {
     setBurning(true);
 
     try {
-      // Example: send 0.01 SOL to burn + 1% to fee wallet
       const totalLamports = 0.01 * LAMPORTS_PER_SOL;
       const feeLamports = totalLamports * 0.01;
       const burnLamports = totalLamports - feeLamports;
@@ -47,7 +46,7 @@ export default function MemeBlazer() {
 
       const signature = await sendTransaction(tx, connection);
       await connection.confirmTransaction(signature, "confirmed");
-      alert("🔥 Burn complete!");
+      alert("Burn complete!");
     } catch (error) {
       console.error("Burn failed", error);
       alert("Burn failed — check console.");
@@ -59,7 +58,7 @@ export default function MemeBlazer() {
   return (
     <div className="min-h-screen bg-black text-white p-4">
       <header className="flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
-        <h1 className="text-3xl font-bold">{'\u{1F525}'} Meme Blazer v2</h1>
+        <h1 className="text-3xl font-bold">Meme Blazer v2</h1>
         <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
       </header>
 
@@ -93,7 +92,7 @@ export default function MemeBlazer() {
           </div>
         </div>
       ) : (
-        <p className="text-lg">Connect your wallet to begin burning bags {'\u{1F525}'}</p>
+        <p className="text-lg">Connect your wallet to begin burning bags.</p>
       )}
 
       <footer className="mt-10 border-t border-gray-700 pt-4 text-center text-sm">
