@@ -27,7 +27,7 @@ export default function MemeBlazer() {
     setBurning(true);
 
     try {
-      // Example: send 0.01 SOL to burn + 1% to fee wallet (placeholder logic)
+      // Example: send 0.01 SOL to burn + 1% to fee wallet
       const totalLamports = 0.01 * LAMPORTS_PER_SOL;
       const feeLamports = totalLamports * 0.01;
       const burnLamports = totalLamports - feeLamports;
@@ -59,7 +59,7 @@ export default function MemeBlazer() {
   return (
     <div className="min-h-screen bg-black text-white p-4">
       <header className="flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
-        <h1 className="text-3xl font-bold">🔥 Meme Blazer v2</h1>
+        <h1 className="text-3xl font-bold">{'\u{1F525}'} Meme Blazer v2</h1>
         <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
       </header>
 
@@ -93,7 +93,7 @@ export default function MemeBlazer() {
           </div>
         </div>
       ) : (
-        <p className="text-lg">Connect your wallet to begin burning bags 🔥</p>
+        <p className="text-lg">Connect your wallet to begin burning bags {'\u{1F525}'}</p>
       )}
 
       <footer className="mt-10 border-t border-gray-700 pt-4 text-center text-sm">
