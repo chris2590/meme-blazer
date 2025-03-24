@@ -42,7 +42,7 @@ export default function App() {
 
       const sig = await sendTransaction(tx, connection);
       await connection.confirmTransaction(sig, "confirmed");
-      alert("Burn complete!");
+      alert("🔥 Burn complete!");
     } catch (err) {
       console.error("Burn failed", err);
       alert("Error burning tokens.");
@@ -54,7 +54,7 @@ export default function App() {
   return (
     <div style={{ backgroundColor: "black", color: "white", minHeight: "100vh", padding: "1rem" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid gray", paddingBottom: "1rem", marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "30px", fontWeight: "bold" }}>Meme Blazer v2</h1>
+        <h1 style={{ fontSize: "30px", fontWeight: "bold" }}>{"Meme Blazer v2"}</h1>
         <WalletMultiButton />
       </header>
 
