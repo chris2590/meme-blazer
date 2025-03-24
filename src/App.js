@@ -10,7 +10,7 @@ import {
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
-// Primary RPC and fallback
+// Primary RPC
 const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
 const connection = new Connection(PRIMARY_RPC, "confirmed");
 
@@ -78,13 +78,37 @@ export default function MemeBlazer() {
             >
               {burning ? "Burning..." : "Burn Tokens"}
             </button>
-            <button style={{ backgroundColor: "#2563eb", padding: "1rem", borderRadius: "0.75rem", fontSize: "1.25rem", color: "white" }}>
+            <button
+              style={{
+                backgroundColor: "#2563eb",
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                fontSize: "1.25rem",
+                color: "white",
+              }}
+            >
               Burn NFTs
             </button>
-            <button style={{ backgroundColor: "#16a34a", padding: "1rem", borderRadius: "0.75rem", fontSize: "1.25rem", color: "white" }}>
+            <button
+              style={{
+                backgroundColor: "#16a34a",
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                fontSize: "1.25rem",
+                color: "white",
+              }}
+            >
               Burn Domains
             </button>
-            <button style={{ backgroundColor: "#ca8a04", padding: "1rem", borderRadius: "0.75rem", fontSize: "1.25rem", color: "white" }}>
+            <button
+              style={{
+                backgroundColor: "#ca8a04",
+                padding: "1rem",
+                borderRadius: "0.75rem",
+                fontSize: "1.25rem",
+                color: "white",
+              }}
+            >
               Close Rent Accounts
             </button>
           </div>
@@ -104,8 +128,14 @@ export default function MemeBlazer() {
       )}
 
       <footer style={{ marginTop: "3rem", borderTop: "1px solid #444", paddingTop: "1rem", textAlign: "center", fontSize: "0.875rem" }}>
-        Follow us on <a href="https://x.com/MemeCoinMania77" style={{ color: "#60a5fa" }} target="_blank" rel="noopener noreferrer">@memecoinmania77</a> and join the{" "}
-        <a href="https://t.me/memecoinmaniadex" style={{ color: "#4ade80" }} target="_blank" rel="noopener noreferrer">Telegram</a>
+        Follow us on{" "}
+        <a href="https://x.com/MemeCoinMania77" style={{ color: "#60a5fa" }} target="_blank" rel="noopener noreferrer">
+          @memecoinmania77
+        </a>{" "}
+        and join the{" "}
+        <a href="https://t.me/memecoinmaniadex" style={{ color: "#4ade80" }} target="_blank" rel="noopener noreferrer">
+          Telegram
+        </a>
       </footer>
     </div>
   );
