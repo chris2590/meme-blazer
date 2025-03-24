@@ -1,10 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import MemeBlazer from "./App.jsx";
+import MemeBlazer from "./App";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <MemeBlazer />
   </React.StrictMode>
