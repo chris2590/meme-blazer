@@ -1,48 +1,33 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  ConnectionProvider,
-  WalletProvider
-} from "@solana/wallet-adapter-react";
-import {
-  WalletModalProvider,
-  WalletMultiButton
-} from "@solana/wallet-adapter-react-ui";
-
-import {
-  PhantomWalletAdapter
-} from "@solana/wallet-adapter-phantom";
-import {
-  SolflareWalletAdapter
-} from "@solana/wallet-adapter-solflare";
-
-import {
+  Connection,
+  clusterApiUrl,
   PublicKey,
   Transaction,
   SystemProgram,
-  LAMPORTS_PER_SOL,
-  clusterApiUrl,
-  Connection
+  LAMPORTS_PER_SOL
 } from "@solana/web3.js";
 
-import { useWallet } from "@solana/wallet-adapter-react";
-
-import "@solana/wallet-adapter-react-ui/styles.css";
-
-const QUICKNODE_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
+// Primary and backup RPC endpoints
+const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
 const BACKUP_RPC = clusterApiUrl("mainnet-beta");
+const connection = new Connection(PRIMARY_RPC, "confirmed");
 
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const BURN_ADDRESS = new PublicKey("11111111111111111111111111111111");
 
-function BurnerUI() {
+export default function MemeBlazer() {
   const { publicKey, sendTransaction } = useWallet();
   const [burning, setBurning] = useState(false);
-  const connection = useMemo(() => new Connection(QUICKNODE_RPC, "confirmed"), []);
 
   const handleTokenBurn = async () => {
     if (!publicKey) return;
     setBurning(true);
+
     try {
+      // Example: send 0.01 SOL to burn + 1% to fee wallet (placeholder logic)
       const totalLamports = 0.01 * LAMPORTS_PER_SOL;
       const feeLamports = totalLamports * 0.01;
       const burnLamports = totalLamports - feeLamports;
@@ -60,13 +45,14 @@ function BurnerUI() {
         })
       );
 
-      const sig = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(sig, "confirmed");
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction(signature, "confirmed");
       alert("🔥 Burn complete!");
-    } catch (err) {
-      console.error(err);
-      alert("Burn failed.");
+    } catch (error) {
+      console.error("Burn failed", error);
+      alert("Burn failed — check console.");
     }
+
     setBurning(false);
   };
 
@@ -114,22 +100,5 @@ function BurnerUI() {
         Follow us on <a href="https://x.com/MemeCoinMania77" className="text-blue-400" target="_blank" rel="noopener noreferrer">@memecoinmania77</a> and join the <a href="https://t.me/memecoinmaniadex" className="text-green-400" target="_blank" rel="noopener noreferrer">Telegram</a>
       </footer>
     </div>
-  );
-}
-
-export default function App() {
-  const wallets = useMemo(() => [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter()
-  ], []);
-
-  return (
-    <ConnectionProvider endpoint={QUICKNODE_RPC}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <BurnerUI />
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
   );
 }
