@@ -3,16 +3,15 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   Connection,
-  clusterApiUrl,
   PublicKey,
   Transaction,
   SystemProgram,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
-// RPC Setup
-const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
-const connection = new Connection(PRIMARY_RPC, "confirmed");
+// RPC & addresses
+const RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
+const connection = new Connection(RPC, "confirmed");
 
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
 const BURN_ADDRESS = new PublicKey("11111111111111111111111111111111");
@@ -43,70 +42,74 @@ export default function MemeBlazer() {
         })
       );
 
-      const signature = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-      alert("Burn complete!");
-    } catch (error) {
-      console.error("Burn failed", error);
-      alert("Burn failed — check console.");
+      const sig = await sendTransaction(tx, connection);
+      await connection.confirmTransaction(sig, "confirmed");
+      alert("🔥 Burn successful!");
+    } catch (err) {
+      console.error("Burn failed", err);
+      alert("Error during burn.");
     }
 
     setBurning(false);
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "black", color: "white", padding: "1rem" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #444", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+    <div style={{ backgroundColor: "black", color: "white", minHeight: "100vh", padding: "1rem" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #444", paddingBottom: "1rem", marginBottom: "2rem" }}>
         <h1 style={{ fontSize: "1.875rem", fontWeight: "bold" }}>Meme Blazer v2</h1>
         <WalletMultiButton />
       </header>
 
       {publicKey ? (
         <div>
-          <p>Connected Wallet: {publicKey.toBase58()}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
+          <p style={{ marginBottom: "1rem" }}>Connected Wallet: {publicKey.toBase58()}</p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <button
               onClick={handleTokenBurn}
               disabled={burning}
               style={{
                 backgroundColor: "#dc2626",
+                color: "white",
                 padding: "1rem",
                 borderRadius: "0.75rem",
                 fontSize: "1.25rem",
-                color: "white",
               }}
             >
               {burning ? "Burning..." : "Burn Tokens"}
             </button>
+
             <button
               style={{
                 backgroundColor: "#2563eb",
+                color: "white",
                 padding: "1rem",
                 borderRadius: "0.75rem",
                 fontSize: "1.25rem",
-                color: "white",
               }}
             >
               Burn NFTs
             </button>
+
             <button
               style={{
                 backgroundColor: "#16a34a",
+                color: "white",
                 padding: "1rem",
                 borderRadius: "0.75rem",
                 fontSize: "1.25rem",
-                color: "white",
               }}
             >
               Burn Domains
             </button>
+
             <button
               style={{
-                backgroundColor: "#ca8a04",
+                backgroundColor: "#eab308",
+                color: "black",
                 padding: "1rem",
                 borderRadius: "0.75rem",
                 fontSize: "1.25rem",
-                color: "white",
               }}
             >
               Close Rent Accounts
@@ -116,7 +119,8 @@ export default function MemeBlazer() {
           <div style={{ marginTop: "2rem" }}>
             <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Referral System</h2>
             <p style={{ fontSize: "0.875rem" }}>
-              Share this link to earn rewards: <br />
+              Share this link to earn rewards:
+              <br />
               <code style={{ color: "#c084fc" }}>
                 https://memeblazer.netlify.app/?ref={publicKey.toBase58()}
               </code>
@@ -124,26 +128,16 @@ export default function MemeBlazer() {
           </div>
         </div>
       ) : (
-        <p>Connect your wallet to begin burning bags.</p>
+        <p>Connect your wallet to start burning your bags 🔥</p>
       )}
 
-      <footer style={{ marginTop: "3rem", borderTop: "1px solid #444", paddingTop: "1rem", textAlign: "center", fontSize: "0.875rem" }}>
+      <footer style={{ marginTop: "3rem", borderTop: "1px solid #444", paddingTop: "1rem", fontSize: "0.875rem", textAlign: "center" }}>
         Follow us on{" "}
-        <a
-          href="https://x.com/MemeCoinMania77"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "#60a5fa" }}
-        >
+        <a href="https://x.com/MemeCoinMania77" target="_blank" rel="noreferrer" style={{ color: "#60a5fa" }}>
           @memecoinmania77
         </a>{" "}
         and join the{" "}
-        <a
-          href="https://t.me/memecoinmaniadex"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "#4ade80" }}
-        >
+        <a href="https://t.me/memecoinmaniadex" target="_blank" rel="noreferrer" style={{ color: "#4ade80" }}>
           Telegram
         </a>
       </footer>
