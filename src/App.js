@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
@@ -7,12 +7,10 @@ import {
   PublicKey,
   Transaction,
   SystemProgram,
-  LAMPORTS_PER_SOL
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
-// RPC endpoints
 const PRIMARY_RPC = "https://necessary-small-voice.solana-mainnet.quiknode.pro/c1525aa4daeb6697ac1a3faa3da30b005b54b26e/";
-const BACKUP_RPC = clusterApiUrl("mainnet-beta");
 const connection = new Connection(PRIMARY_RPC, "confirmed");
 
 const FEE_WALLET = new PublicKey("GcuxAvTz9SsEaWf9hLfjbrDGpeu7DUxXKEpgpCMWstDb");
@@ -83,11 +81,14 @@ export default function MemeBlazer() {
               Close Rent Accounts
             </button>
           </div>
+
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-2">Referral System</h2>
             <p className="text-sm">
               Share this link to earn rewards: <br />
-              <code className="text-purple-400">https://memeblazer.netlify.app/?ref={publicKey.toBase58()}</code>
+              <code className="text-purple-400">
+                https://memeblazer.netlify.app/?ref={publicKey.toBase58()}
+              </code>
             </p>
           </div>
         </div>
@@ -96,7 +97,24 @@ export default function MemeBlazer() {
       )}
 
       <footer className="mt-10 border-t border-gray-700 pt-4 text-center text-sm">
-        Follow us on <a href="https://x.com/MemeCoinMania77" className="text-blue-400" target="_blank" rel="noopener noreferrer">@memecoinmania77</a> and join the <a href="https://t.me/memecoinmaniadex" className="text-green-400" target="_blank" rel="noopener noreferrer">Telegram</a>
+        Follow us on{" "}
+        <a
+          href="https://x.com/MemeCoinMania77"
+          className="text-blue-400"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          @memecoinmania77
+        </a>{" "}
+        and join the{" "}
+        <a
+          href="https://t.me/memecoinmaniadex"
+          className="text-green-400"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Telegram
+        </a>
       </footer>
     </div>
   );
