@@ -7,14 +7,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.95.2",
-    "@solana/wallet-adapter-base": "^0.10.4",
-    "@solana/wallet-adapter-react": "^0.15.21",
-    "@solana/wallet-adapter-react-ui": "^0.9.20",
-    "@solana/wallet-adapter-wallets": "^0.15.21",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@solana/wallet-adapter-base": "^0.9.20",
+    "@solana/wallet-adapter-react": "^0.15.20",
+    "@solana/wallet-adapter-react-ui": "^0.15.20",
+    "@solana/wallet-adapter-wallets": "^0.15.20",
+    "@solana/web3.js": "^1.89.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
     "vite": "^4.5.0"
   }
 }
