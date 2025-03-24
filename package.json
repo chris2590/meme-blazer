@@ -1,5 +1,5 @@
 {
-  "name": "meme-blazer-v2",
+  "name": "meme-blazer",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
@@ -7,22 +7,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solana/wallet-adapter-base": "^0.9.20",
-    "@solana/wallet-adapter-react": "^0.15.18",
-    "@solana/wallet-adapter-react-ui": "^0.10.3",
-    "@solana/wallet-adapter-wallets": "^0.15.18",
-    "@solana/web3.js": "^1.82.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
- {
-  "dependencies": {
     "@solana/web3.js": "^1.88.2",
     "@solana/wallet-adapter-base": "^0.9.20",
     "@solana/wallet-adapter-react": "^0.15.18",
     "@solana/wallet-adapter-react-ui": "^0.10.3",
     "@solana/wallet-adapter-wallets": "^0.15.18",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
     "vite": "^4.5.0"
   }
 }
