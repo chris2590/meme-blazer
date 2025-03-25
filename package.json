@@ -8,11 +8,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solana/wallet-adapter-base": "^0.10.4",
-    "@solana/wallet-adapter-react": "^0.15.5",
-    "@solana/wallet-adapter-react-ui": "^0.9.18",
-    "@solana/wallet-adapter-wallets": "^0.15.5",
-    "@solana/web3.js": "^1.76.1",
+    "@solana/web3.js": "^1.80.1",
+    "@solana/wallet-adapter-base": "^0.9.20",
+    "@solana/wallet-adapter-react": "^0.15.17",
+    "@solana/wallet-adapter-react-ui": "^0.9.20",
+    "@solana/wallet-adapter-wallets": "^0.15.17",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -21,4 +21,3 @@
     "vite": "^4.5.0"
   }
 }
-
